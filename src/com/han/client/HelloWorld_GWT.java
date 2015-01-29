@@ -1,23 +1,45 @@
 package com.han.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class HelloWorld_GWT implements EntryPoint {
+	
+	private TabPanel tabPanel;
+	
+	private void selectTab(String historyToken) {
+		//Parse the history token
+		try {
+			if(historyToken.substring(0, 9).equals("pageIndex")) {
+				String tabIndexToken = historyToken.substring(9, 10);
+				int tabIndex = Integer.parseInt(tabIndexToken);
+				
+				//Select the selected tab panel
+				tabPanel.selectTab(tabIndex);
+			}
+			else {
+				tabPanel.selectTab(0);
+			}
+		}
+		catch(IndexOutOfBoundsException e) {
+			tabPanel.selectTab(0);
+		}
+	}
 
 	public void onModuleLoad() {
 		//Create a tab panel to carry multiple pages
-		final TabPanel tabPanel = new TabPanel();
+		tabPanel = new TabPanel();
 		
 		//Create pages
 		HTML firstPage = new HTML("<h1>We are on the first page.</h1>");
@@ -27,25 +49,29 @@ public class HelloWorld_GWT implements EntryPoint {
 		String firstPageTitle = "First Page";
 		String secondPageTitle = "Second Page";
 		String thirdPageTitle = "Third Page";
-		tabPanel.setWidth("400");
 		
+		Hyperlink firstPageLink = new Hyperlink("1", "pageIndex0");
+		Hyperlink secondPageLink = new Hyperlink("2", "pageIndex1");
+		Hyperlink thirdPageLink = new Hyperlink("3", "pageIndex2");
+		
+		HorizontalPanel linksHPanel = new HorizontalPanel();
+		linksHPanel.setSpacing(10);
+		linksHPanel.add(firstPageLink);
+		linksHPanel.add(secondPageLink);
+		linksHPanel.add(thirdPageLink);
+		
+		//If application starts with no history token, redirect to a pageIndex0
+		String initToken = History.getToken();
+		if(initToken.length() == 0) {
+			History.newItem("pageIndex0");
+			initToken = "pageIndex0";
+		}
+		
+		tabPanel.setWidth("400");
 		//Add pages to tabPanel
 		tabPanel.add(firstPage, firstPageTitle);
 		tabPanel.add(secondPage, secondPageTitle);
 		tabPanel.add(thirdPage, thirdPageTitle);
-		
-		//Add tab selection handler
-		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-			
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				/*Add a token to history containing pageIndex
-				 * History class will change the URL of the application
-				 * by appending the token to it
-				 */
-				History.newItem("pageIndex" + event.getSelectedItem());
-			}
-		});
 		
 		/*Add value change handler to History
 		 * this method will be called when browser's
@@ -56,30 +82,18 @@ public class HelloWorld_GWT implements EntryPoint {
 			
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				String historyToken = event.getValue();
-				//Parse the history token
-				try {
-					if(historyToken.substring(0, 9).equals("pageIndex")) {
-						String tabIndexToken = historyToken.substring(9, 10);
-						int tabIndex = Integer.parseInt(tabIndexToken);
-						
-						//Select the selected tab panel
-						tabPanel.selectTab(tabIndex);
-					}
-					else {
-						tabPanel.selectTab(0);
-					}
-				}
-				catch(IndexOutOfBoundsException e) {
-					tabPanel.selectTab(0);
-				}
+				selectTab(event.getValue());
 			}
 		});
 		
-		//Select the first tab by default
-		tabPanel.selectTab(0);
+		selectTab(initToken);
+		
+		VerticalPanel vPanel = new VerticalPanel();
+		vPanel.setSpacing(10);
+		vPanel.add(tabPanel);
+		vPanel.add(linksHPanel);
 		
 		//Add widgets to root panel
-		RootPanel.get("gwtContainer").add(tabPanel);
+		RootPanel.get("gwtContainer").add(vPanel);
 	}
 }
