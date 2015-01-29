@@ -1,8 +1,12 @@
 package com.han.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -17,6 +21,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class HelloWorld_GWT implements EntryPoint {
 	
 	private TabPanel tabPanel;
+	
+	//Create Root Logger
+	private static Logger rootLogger = Logger.getLogger("");
+	private VerticalPanel customLogArea;
 	
 	private void selectTab(String historyToken) {
 		//Parse the history token
@@ -83,6 +91,7 @@ public class HelloWorld_GWT implements EntryPoint {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				selectTab(event.getValue());
+				rootLogger.log(Level.SEVERE, "pageIndex selected: " + event.getValue());
 			}
 		});
 		
@@ -92,6 +101,12 @@ public class HelloWorld_GWT implements EntryPoint {
 		vPanel.setSpacing(10);
 		vPanel.add(tabPanel);
 		vPanel.add(linksHPanel);
+		
+		customLogArea = new VerticalPanel();
+		vPanel.add(customLogArea);
+		
+		//An example of using own custom logging area
+		rootLogger.addHandler(new HasWidgetsLogHandler(customLogArea));
 		
 		//Add widgets to root panel
 		RootPanel.get("gwtContainer").add(vPanel);
