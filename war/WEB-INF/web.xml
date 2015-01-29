@@ -20,5 +20,14 @@
   <welcome-file-list>
     <welcome-file>HelloWorld_GWT.html</welcome-file>
   </welcome-file-list>
-
+  
+  <servlet>
+      <servlet-name>messageServiceImpl</servlet-name>
+      <servlet-class>com.han.server.MessageServiceImpl
+      </servlet-class>
+   </servlet>
+   <servlet-mapping>
+      <servlet-name>messageServiceImpl</servlet-name>
+      <url-pattern>/helloworld_gwt/message</url-pattern>
+   </servlet-mapping>
 </web-app>
